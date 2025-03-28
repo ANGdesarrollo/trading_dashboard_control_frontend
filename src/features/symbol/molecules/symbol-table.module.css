@@ -1,0 +1,51 @@
+.container {
+    @apply mx-auto py-6;
+}
+
+.header {
+    @apply flex justify-between items-center mb-6;
+}
+
+.title {
+    @apply text-2xl font-bold;
+}
+
+.createButton {
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-md;
+}
+
+.tableContainer {
+    @apply bg-card rounded-lg shadow-sm;
+}
+
+.tableCell {
+    @apply text-center py-4;
+}
+
+.idCell {
+    @apply font-mono text-xs;
+}
+
+.nameCell {
+    @apply font-medium;
+}
+
+.actionsCell {
+    @apply text-right;
+}
+
+.actionsContainer {
+    @apply flex justify-end gap-2;
+}
+
+.editButton {
+    @apply bg-accent text-accent-foreground p-2 rounded-md;
+}
+
+.deleteButton {
+    @apply bg-destructive text-destructive-foreground p-2 rounded-md;
+}
+
+.dialogWidth {
+    @apply sm:max-w-md;
+}
