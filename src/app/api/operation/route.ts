@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     try {
         if (id) {
-            // Get operation by ID
+            // Get symbol by ID
             const result = await operationService.get<Operation>(`/trading/${id}`);
 
             if (result.success) {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error creating operation:', error);
+        console.error('Error creating symbol:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error updating operation:', error);
+        console.error('Error updating symbol:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
@@ -108,7 +108,7 @@ export async function DELETE(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error deleting operation:', error);
+        console.error('Error deleting symbol:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

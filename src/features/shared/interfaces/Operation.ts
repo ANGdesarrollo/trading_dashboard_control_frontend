@@ -6,14 +6,14 @@ export enum TradeType {
     SHORT = 'SHORT'
 }
 
-// Enum for operation result
+// Enum for symbol result
 export enum Result {
     WON = 'WON',
     LOST = 'LOST',
     BE = 'BE'
 }
 
-// Base operation entity that matches OperationDomain from backend
+// Base symbol entity that matches OperationDomain from backend
 export interface Operation extends BaseDomain {
     symbolId: string;
     symbol?: Symbol;
