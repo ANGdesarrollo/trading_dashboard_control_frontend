@@ -1,12 +1,12 @@
 import { PublicLayout } from "@/layouts/PublicLayout";
 import {SymbolTemplate} from "@/features/symbol/template/SymbolTemplate";
 import {Suspense} from "react";
-import {Skeleton} from "@/features/shared/atoms/Skeleton";
+import {SymbolTableSkeleton} from "@/features/symbol/molecules/SymbolTableSkeleton";
 
 const Page = () => {
   return (
     <PublicLayout>
-        <Suspense fallback={<Skeleton />}>
+        <Suspense fallback={<SymbolTableSkeleton />}>
             <SymbolTemplate />
         </Suspense>
     </PublicLayout>
