@@ -13,7 +13,7 @@
 }
 
 .createButton {
-    @apply bg-primary text-primary-foreground px-4 py-2 rounded-md;
+    @apply bg-primary text-[var(--color-primary-foreground)] px-4 py-2 rounded-md;
 }
 
 .tableContainer {
@@ -41,11 +41,11 @@
 }
 
 .editButton {
-    @apply bg-accent text-accent-foreground p-2 rounded-md;
+    @apply bg-accent text-[var(--color-accent-foreground)] p-2 rounded-md;
 }
 
 .deleteButton {
-    @apply bg-destructive text-destructive-foreground p-2 rounded-md;
+    @apply bg-destructive text-[var(--color-destructive-foreground)] p-2 rounded-md;
 }
 
 .dialogWidth {
