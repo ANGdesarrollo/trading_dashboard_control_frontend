@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow
 } from "@/features/shared/organisms/Table";
-import {Symbol, SymbolDto} from "@/features/shared/interfaces";
+import {Symbol, SymbolDto, UpdateSymbolDto} from "@/features/shared/interfaces";
 import {formatDate} from "@/lib/utils";
 import React, {useState} from "react";
 import {CreateSymbolForm} from "@/features/symbol/molecules/SymbolCreateForm";
@@ -16,6 +16,8 @@ import {symbolRepository} from "@/features/shared/repositories";
 import {revalidate} from "@/features/shared/utls/revalidate";
 import { Dialog } from "@radix-ui/react-dialog";
 import {DialogContent, DialogHeader, DialogTitle} from "@/features/shared/molecules/Dialog";
+import {UpdateSymbolForm} from "@/features/symbol/molecules/SymbolUpdateForm";
+import {SymbolDeleteConfirmation} from "@/features/symbol/molecules/SymbolDeleteConfirmation";
 import styles from './symbol-table.module.css';
 
 interface Props {
@@ -24,18 +26,86 @@ interface Props {
 
 export const SymbolTable = ({symbols}: Props) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handleCreateSymbol = async (data: SymbolDto) => {
         setIsLoading(true);
         setError(null);
 
-        await symbolRepository.create(data);
-        await revalidate('/symbol');
-        setIsOpen(false);
-        setIsLoading(false);
-    }
+        try {
+            const result = await symbolRepository.create(data);
+
+            if (result.success) {
+                // await revalidate('/symbol');
+                setIsCreateOpen(false);
+            } else {
+                setError(result.error.message);
+            }
+        } catch (err) {
+            setError('Error al crear el símbolo. Intente nuevamente.');
+            console.error('Error creating symbol:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleUpdateSymbol = async (id: string, data: UpdateSymbolDto) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const result = await symbolRepository.update(id, data);
+
+            if (result.success) {
+                await revalidate('/symbol');
+                setIsUpdateOpen(false);
+                setSelectedSymbol(null);
+            } else {
+                setError(result.error.message);
+            }
+        } catch (err) {
+            setError('Error al actualizar el símbolo. Intente nuevamente.');
+            console.error('Error updating symbol:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteSymbol = async (id: string) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const result = await symbolRepository.delete(id);
+
+            if (result.success) {
+                await revalidate('/symbol');
+                setIsDeleteOpen(false);
+                setSelectedSymbol(null);
+            } else {
+                setError(result.error.message);
+            }
+        } catch (err) {
+            setError('Error al eliminar el símbolo. Intente nuevamente.');
+            console.error('Error deleting symbol:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const openUpdateDialog = (symbol: Symbol) => {
+        setSelectedSymbol(symbol);
+        setIsUpdateOpen(true);
+    };
+
+    const openDeleteDialog = (symbol: Symbol) => {
+        setSelectedSymbol(symbol);
+        setIsDeleteOpen(true);
+    };
 
     return (
         <div className={styles.container}>
@@ -43,13 +113,14 @@ export const SymbolTable = ({symbols}: Props) => {
                 <h1 className={styles.title}>Símbolos</h1>
                 <button
                     className={styles.createButton}
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => setIsCreateOpen(true)}
                 >
                     Crear Símbolo
                 </button>
             </div>
 
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            {/* Create Symbol Dialog */}
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className={styles.dialogWidth}>
                     <DialogHeader>
                         <DialogTitle>Crear Nuevo Símbolo</DialogTitle>
@@ -60,6 +131,35 @@ export const SymbolTable = ({symbols}: Props) => {
                         errorMessage={error}
                     />
                 </DialogContent>
+            </Dialog>
+
+            {/* Update Symbol Dialog */}
+            <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
+                {selectedSymbol && (
+                    <DialogContent className={styles.dialogWidth}>
+                        <DialogHeader>
+                            <DialogTitle>Actualizar Símbolo</DialogTitle>
+                        </DialogHeader>
+                        <UpdateSymbolForm
+                            symbol={selectedSymbol}
+                            onSubmit={handleUpdateSymbol}
+                            isLoading={isLoading}
+                            errorMessage={error}
+                        />
+                    </DialogContent>
+                )}
+            </Dialog>
+
+            {/* Delete Symbol Dialog */}
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                {selectedSymbol && (
+                    <SymbolDeleteConfirmation
+                        symbol={selectedSymbol}
+                        onConfirm={handleDeleteSymbol}
+                        isLoading={isLoading}
+                        errorMessage={error}
+                    />
+                )}
             </Dialog>
 
             <div className={styles.tableContainer}>
@@ -93,12 +193,14 @@ export const SymbolTable = ({symbols}: Props) => {
                                             <button
                                                 className={styles.editButton}
                                                 aria-label="Editar"
+                                                onClick={() => openUpdateDialog(symbol)}
                                             >
                                                 Editar
                                             </button>
                                             <button
                                                 className={styles.deleteButton}
                                                 aria-label="Eliminar"
+                                                onClick={() => openDeleteDialog(symbol)}
                                             >
                                                 Eliminar
                                             </button>

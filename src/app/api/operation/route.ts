@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {HttpService} from "@/lib/http_helper/HttpHelper";
-import {Operation, OperationDto, UpdateOperationDto} from "@/features/shared/interfaces";
+import { HttpService } from "@/lib/http_helper/HttpHelper";
+import { Symbol, SymbolDto, UpdateSymbolDto } from "@/features/shared/interfaces";
+import { revalidatePath } from 'next/cache';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const operationService = new HttpService(`${API_BASE_URL}`);
+const symbolService = new HttpService(`${API_BASE_URL}`);
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     try {
         if (id) {
             // Get symbol by ID
-            const result = await operationService.get<Operation>(`/trading/${id}`);
+            const result = await symbolService.get<Symbol>(`/symbol/${id}`);
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -23,8 +24,8 @@ export async function GET(request: NextRequest) {
                 );
             }
         } else {
-            // List all operations
-            const result = await operationService.get<Operation[]>('/trading');
+            // List all symbols
+            const result = await symbolService.get<Symbol[]>('/symbol');
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -43,11 +44,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json() as OperationDto;
-
-        const result = await operationService.post<Operation>('/trading', body);
+        const body = await request.json() as SymbolDto;
+        const result = await symbolService.post<Symbol>('/symbol', body);
 
         if (result.success) {
+            // Revalidate the symbol page after successful creation
+            revalidatePath('/symbol');
             return NextResponse.json(result.data);
         } else {
             return NextResponse.json(
@@ -66,15 +68,16 @@ export async function PUT(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ message: 'Operation ID is required' }, { status: 400 });
+        return NextResponse.json({ message: 'Symbol ID is required' }, { status: 400 });
     }
 
     try {
-        const body = await request.json() as UpdateOperationDto;
-
-        const result = await operationService.put<Operation>(`/trading/${id}`, body);
+        const body = await request.json() as UpdateSymbolDto;
+        const result = await symbolService.put<Symbol>(`/symbol/${id}`, body);
 
         if (result.success) {
+            // Revalidate the symbol page after successful update
+            revalidatePath('/symbol');
             return NextResponse.json(result.data);
         } else {
             return NextResponse.json(
@@ -93,14 +96,16 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ message: 'Operation ID is required' }, { status: 400 });
+        return NextResponse.json({ message: 'Symbol ID is required' }, { status: 400 });
     }
 
     try {
-        const result = await operationService.delete<void>(`/trading/${id}`);
+        const result = await symbolService.delete<void>(`/symbol/${id}`);
 
         if (result.success) {
-            return NextResponse.json({ message: 'Operation deleted successfully' });
+            // Revalidate the symbol page after successful deletion
+            revalidatePath('/symbol');
+            return NextResponse.json({ message: 'Symbol deleted successfully' });
         } else {
             return NextResponse.json(
                 { message: result.error.message },
