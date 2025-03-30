@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
 
     try {
         if (id) {
-            // Get symbol by ID
             const result = await symbolService.get<Symbol>(`/symbol/${id}`);
 
             if (result.success) {
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
                 );
             }
         } else {
-            // List all symbols
             const result = await symbolService.get<Symbol[]>('/symbol');
 
             if (result.success) {

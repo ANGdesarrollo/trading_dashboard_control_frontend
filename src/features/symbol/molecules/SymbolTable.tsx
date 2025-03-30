@@ -13,12 +13,12 @@ import {formatDate} from "@/lib/utils";
 import React, {useState} from "react";
 import {CreateSymbolForm} from "@/features/symbol/molecules/SymbolCreateForm";
 import {symbolRepository} from "@/features/shared/repositories";
-import {revalidate} from "@/features/shared/utls/revalidate";
 import { Dialog } from "@radix-ui/react-dialog";
 import {DialogContent, DialogHeader, DialogTitle} from "@/features/shared/molecules/Dialog";
 import {UpdateSymbolForm} from "@/features/symbol/molecules/SymbolUpdateForm";
 import {SymbolDeleteConfirmation} from "@/features/symbol/molecules/SymbolDeleteConfirmation";
 import styles from './symbol-table.module.css';
+import {useRouter} from "next/navigation";
 
 interface Props {
     symbols: Symbol[];
@@ -31,6 +31,7 @@ export const SymbolTable = ({symbols}: Props) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     const handleCreateSymbol = async (data: SymbolDto) => {
         setIsLoading(true);
@@ -40,7 +41,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.create(data);
 
             if (result.success) {
-                // await revalidate('/symbol');
+                router.refresh();
                 setIsCreateOpen(false);
             } else {
                 setError(result.error.message);
@@ -61,7 +62,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.update(id, data);
 
             if (result.success) {
-                await revalidate('/symbol');
+                router.refresh();
                 setIsUpdateOpen(false);
                 setSelectedSymbol(null);
             } else {
@@ -83,7 +84,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.delete(id);
 
             if (result.success) {
-                await revalidate('/symbol');
+                router.refresh();
                 setIsDeleteOpen(false);
                 setSelectedSymbol(null);
             } else {
