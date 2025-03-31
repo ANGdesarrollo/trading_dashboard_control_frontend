@@ -18,7 +18,7 @@ import {DialogContent, DialogHeader, DialogTitle} from "@/features/shared/molecu
 import {UpdateSymbolForm} from "@/features/symbol/molecules/SymbolUpdateForm";
 import {SymbolDeleteConfirmation} from "@/features/symbol/molecules/SymbolDeleteConfirmation";
 import styles from './symbol-table.module.css';
-import {useRouter} from "next/navigation";
+import {tag} from "@/features/shared/actions/revalidate";
 
 interface Props {
     symbols: Symbol[];
@@ -31,7 +31,6 @@ export const SymbolTable = ({symbols}: Props) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
 
     const handleCreateSymbol = async (data: SymbolDto) => {
         setIsLoading(true);
@@ -41,7 +40,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.create(data);
 
             if (result.success) {
-                router.refresh();
+                await tag('symbol')
                 setIsCreateOpen(false);
             } else {
                 setError(result.error.message);
@@ -62,7 +61,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.update(id, data);
 
             if (result.success) {
-                router.refresh();
+                await tag('symbol')
                 setIsUpdateOpen(false);
                 setSelectedSymbol(null);
             } else {
@@ -84,7 +83,7 @@ export const SymbolTable = ({symbols}: Props) => {
             const result = await symbolRepository.delete(id);
 
             if (result.success) {
-                router.refresh();
+                await tag('symbol')
                 setIsDeleteOpen(false);
                 setSelectedSymbol(null);
             } else {

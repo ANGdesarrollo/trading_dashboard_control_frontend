@@ -4,7 +4,13 @@ import { Symbol, SymbolDto, UpdateSymbolDto } from "@/features/shared/interfaces
 import { revalidatePath } from 'next/cache';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const symbolService = new HttpService(`${API_BASE_URL}`);
+const operationService = new HttpService({
+    baseURL: API_BASE_URL,
+    defaultNextCache: {
+        tags: ['operation'],
+        revalidate: 60
+    }
+});
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -13,7 +19,7 @@ export async function GET(request: NextRequest) {
     try {
         if (id) {
             // Get symbol by ID
-            const result = await symbolService.get<Symbol>(`/symbol/${id}`);
+            const result = await operationService.get<Symbol>(`/symbol/${id}`);
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -25,7 +31,7 @@ export async function GET(request: NextRequest) {
             }
         } else {
             // List all symbols
-            const result = await symbolService.get<Symbol[]>('/symbol');
+            const result = await operationService.get<Symbol[]>('/symbol');
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -45,7 +51,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json() as SymbolDto;
-        const result = await symbolService.post<Symbol>('/symbol', body);
+        const result = await operationService.post<Symbol>('/symbol', body);
 
         if (result.success) {
             // Revalidate the symbol page after successful creation
@@ -73,7 +79,7 @@ export async function PUT(request: NextRequest) {
 
     try {
         const body = await request.json() as UpdateSymbolDto;
-        const result = await symbolService.put<Symbol>(`/symbol/${id}`, body);
+        const result = await operationService.put<Symbol>(`/symbol/${id}`, body);
 
         if (result.success) {
             // Revalidate the symbol page after successful update
@@ -100,7 +106,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     try {
-        const result = await symbolService.delete<void>(`/symbol/${id}`);
+        const result = await operationService.delete<void>(`/symbol/${id}`);
 
         if (result.success) {
             // Revalidate the symbol page after successful deletion

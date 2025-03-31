@@ -12,11 +12,6 @@ export class FileRepository extends BaseRepository<File> {
         return this.httpService.post<File>(
             '/file/upload',
             formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
         );
     }
 }

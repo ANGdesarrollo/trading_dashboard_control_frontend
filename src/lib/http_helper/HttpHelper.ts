@@ -1,21 +1,34 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-
 export type Result<T> =
     | { success: true; data: T }
     | { success: false; error: { message: string; status?: number; context?: Record<string, unknown> } };
 
-export class HttpService {
-    private client: AxiosInstance;
+interface NextCacheOptions {
+    revalidate?: number;
+    tags?: string[];
+}
 
-    constructor(baseURL = '', headers = {}, timeout = 10000) {
-        this.client = axios.create({
-            baseURL,
-            headers: {
-                'Content-Type': 'application/json',
-                ...headers
-            },
-            timeout
-        });
+export interface HttpServiceConfig {
+    baseURL?: string;
+    headers?: Record<string, string>;
+    defaultNextCache?: NextCacheOptions;
+}
+
+export class HttpService {
+    private readonly baseURL: string;
+    private readonly headers: Record<string, string>;
+    private readonly defaultNextCache?: NextCacheOptions;
+
+    constructor({
+                    baseURL = '',
+                    headers = {},
+                    defaultNextCache
+                }: HttpServiceConfig = {}) {
+        this.baseURL = baseURL;
+        this.headers = {
+            'Content-Type': 'application/json',
+            ...headers
+        };
+        this.defaultNextCache = defaultNextCache;
     }
 
     private success<T>(data: T): Result<T> {
@@ -29,77 +42,84 @@ export class HttpService {
         };
     }
 
-    private ensureError(value: unknown): Error {
-        if (value instanceof Error) {
-            return value;
-        }
+    private async request<T>(
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+        url: string,
+        options: {
+            body?: unknown;
+            params?: Record<string, string | number | boolean>;
+            headers?: Record<string, string>;
+            nextCache?: NextCacheOptions;
+        } = {}
+    ): Promise<Result<T>> {
+        const { body, params, headers, nextCache } = options;
 
-        let stringified = '[Unable to stringify the thrown value]';
+        const queryString = params
+            ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
+            : '';
+
+        const nextOptions = nextCache ?? this.defaultNextCache;
+        const next = nextOptions
+            ? {
+                next: {
+                    revalidate: nextOptions.revalidate,
+                    tags: nextOptions.tags
+                }
+            }
+            : {};
+
         try {
-            stringified = JSON.stringify(value);
-        } catch {}
+            const response = await fetch(`${this.baseURL}${url}${queryString}`, {
+                method,
+                headers: {
+                    ...this.headers,
+                    ...headers // 🔥 Sobrescribí o agregá headers custom
+                },
+                body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+                ...next
+            });
 
-        return new Error(`Unknown error: ${stringified}`);
-    }
+            const contentType = response.headers.get('Content-Type');
+            const isJson = contentType?.includes('application/json');
+            const data = isJson ? await response.json() : null;
 
-    private handleApiError(error: unknown): Result<never> {
-        const err = this.ensureError(error);
+            if (!response.ok) {
+                const message = typeof data?.message === 'string' ? data.message : response.statusText;
+                return this.failure(message, response.status, data ?? undefined);
+            }
 
-        if (axios.isAxiosError(err) && err.response) {
-            const status = err.response.status;
-            const data = err.response.data as Record<string, unknown>;
-            const message = typeof data?.message === 'string'
-                ? data.message
-                : err.message || 'API Error';
-
-            return this.failure(message, status, data);
-        }
-
-        return this.failure(err.message || 'Network Error', 500);
-    }
-
-    async get<T>(url: string, params = {}, config: AxiosRequestConfig = {}): Promise<Result<T>> {
-        try {
-            const response = await this.client.get<T>(url, { ...config, params });
-            return this.success(response.data);
-        } catch (err: unknown) {
-            return this.handleApiError(err);
-        }
-    }
-
-    async post<T>(url: string, data = {}, config: AxiosRequestConfig = {}): Promise<Result<T>> {
-        try {
-            const response = await this.client.post<T>(url, data, config);
-            return this.success(response.data);
-        } catch (err: unknown) {
-            return this.handleApiError(err);
-        }
-    }
-
-    async put<T>(url: string, data = {}, config: AxiosRequestConfig = {}): Promise<Result<T>> {
-        try {
-            const response = await this.client.put<T>(url, data, config);
-            return this.success(response.data);
-        } catch (err: unknown) {
-            return this.handleApiError(err);
+            return this.success(data as T);
+        } catch (error) {
+            return this.failure(error instanceof Error ? error.message : 'Unknown error', 500);
         }
     }
 
-    async patch<T>(url: string, data = {}, config: AxiosRequestConfig = {}): Promise<Result<T>> {
-        try {
-            const response = await this.client.patch<T>(url, data, config);
-            return this.success(response.data);
-        } catch (err: unknown) {
-            return this.handleApiError(err);
-        }
+
+    get<T>(
+        url: string,
+        params?: Record<string, string | number | boolean>,
+        nextCache?: NextCacheOptions
+    ): Promise<Result<T>> {
+        return this.request<T>('GET', url, { params, nextCache });
     }
 
-    async delete<T>(url: string, config: AxiosRequestConfig = {}): Promise<Result<T>> {
-        try {
-            const response = await this.client.delete<T>(url, config);
-            return this.success(response.data);
-        } catch (err: unknown) {
-            return this.handleApiError(err);
-        }
+    post<T>(
+        url: string,
+        body?: unknown,
+        nextCache?: NextCacheOptions
+    ): Promise<Result<T>> {
+        return this.request<T>('POST', url, { body, nextCache });
+    }
+
+    put<T>(url: string, body?: unknown): Promise<Result<T>> {
+        return this.request<T>('PUT', url, { body });
+    }
+
+    patch<T>(url: string, body?: unknown): Promise<Result<T>> {
+        return this.request<T>('PATCH', url, { body });
+    }
+
+    delete<T>(url: string): Promise<Result<T>> {
+        return this.request<T>('DELETE', url);
     }
 }

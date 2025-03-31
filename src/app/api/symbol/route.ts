@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {HttpService} from "@/lib/http_helper/HttpHelper";
 import {Symbol, SymbolDto, UpdateSymbolDto} from "@/features/shared/interfaces";
+import {HttpService} from "@/lib/http_helper/HttpHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const symbolService = new HttpService(`${API_BASE_URL}`);
+const symbolService = new HttpService({
+    baseURL: API_BASE_URL,
+    defaultNextCache: {
+        tags: ['symbol'],
+    }
+});
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;

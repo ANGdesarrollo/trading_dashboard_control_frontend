@@ -4,7 +4,13 @@ import {UpdateFileDto} from "@/features/shared/interfaces";
 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const fileService = new HttpService(`${API_BASE_URL}`);
+const fileService = new HttpService({
+    baseURL: API_BASE_URL,
+    defaultNextCache: {
+        tags: ['file'],
+        revalidate: 60
+    }
+});
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
