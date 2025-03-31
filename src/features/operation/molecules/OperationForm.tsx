@@ -3,48 +3,52 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { joiResolver } from '@hookform/resolvers/joi';
-import { Operation, UpdateOperationDto, TradeType, Result } from '@/features/shared/interfaces';
+import { Operation, OperationDto, TradeType, Result, Symbol } from '@/features/shared/interfaces';
 import { operationSchema } from "@/features/operation/schemas/OperationSchema";
-import styles from './operation-update-form.module.css';
-import { Symbol } from '@/features/shared/interfaces';
+import styles from './operation-form.module.css';
 
-interface UpdateOperationFormProps {
-    symbols: Symbol[];
-    operation: Operation;
-    onSubmit: (id: string, data: UpdateOperationDto & { file?: globalThis.File }) => Promise<void>;
+interface OperationFormProps {
+    operation?: Operation; // Optional - if provided, it's an update operation
+    onSubmit: (data: OperationDto & { file?: File }, id?: string) => Promise<void>;
+    onFileUpload?: (file: File) => Promise<string | null | undefined>;
     isLoading?: boolean;
     errorMessage?: string | null;
+    symbols: Symbol[];
 }
 
-export const UpdateOperationForm: React.FC<UpdateOperationFormProps> = ({
-                                                                            operation,
-                                                                            onSubmit,
-                                                                            isLoading = false,
-                                                                            errorMessage = null,
-                                                                            symbols
-                                                                        }) => {
-    const [selectedFile, setSelectedFile] = useState<globalThis.File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(operation.file?.url || null);
+export const OperationForm: React.FC<OperationFormProps> = ({
+                                                                operation,
+                                                                onSubmit,
+                                                                onFileUpload,
+                                                                isLoading = false,
+                                                                errorMessage = null,
+                                                                symbols
+                                                            }) => {
+    const isEditMode = !!operation;
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        operation?.file?.url || null
+    );
 
     const {
         register,
         handleSubmit,
         setValue,
         formState: { errors }
-    } = useForm<UpdateOperationDto & { file?: globalThis.File }>({
+    } = useForm<OperationDto & { file?: File }>({
         resolver: joiResolver(operationSchema),
         defaultValues: {
-            symbolId: operation.symbolId,
-            fileId: operation.fileId,
-            type: operation.type,
-            pips: operation.pips,
-            result: operation.result,
-            date: new Date(operation.date),
-            description: operation.description || ''
+            symbolId: operation?.symbolId || '',
+            fileId: operation?.fileId,
+            type: operation?.type || TradeType.LONG,
+            pips: operation?.pips || 0,
+            result: operation?.result || Result.WON,
+            date: operation?.date ? new Date(operation.date) : new Date(),
+            description: operation?.description || ''
         }
     });
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setSelectedFile(file);
@@ -56,14 +60,23 @@ export const UpdateOperationForm: React.FC<UpdateOperationFormProps> = ({
                 setPreviewUrl(reader.result as string);
             };
             reader.readAsDataURL(file);
+
+            if (onFileUpload) {
+                await onFileUpload(file);
+            }
         }
     };
 
-    const handleFormSubmit = async (data: UpdateOperationDto & { file?: globalThis.File }) => {
+    const handleFormSubmit = async (data: OperationDto & { file?: File }) => {
         if (selectedFile) {
             data.file = selectedFile;
         }
-        await onSubmit(operation.id, data);
+
+        if (isEditMode && operation) {
+            await onSubmit(data, operation.id);
+        } else {
+            await onSubmit(data);
+        }
     };
 
     return (
@@ -204,13 +217,22 @@ export const UpdateOperationForm: React.FC<UpdateOperationFormProps> = ({
                             alt="Vista previa"
                             className={styles.previewImage}
                         />
-                        <p className={styles.previewCaption}>
-                            {selectedFile ? 'Nueva imagen seleccionada' : 'Imagen actual'}
-                        </p>
+                        {isEditMode && selectedFile && (
+                            <p className={styles.previewCaption}>
+                                Nueva imagen seleccionada
+                            </p>
+                        )}
+                        {isEditMode && !selectedFile && (
+                            <p className={styles.previewCaption}>
+                                Imagen actual
+                            </p>
+                        )}
                     </div>
                 )}
                 <p className={styles.helperText}>
-                    Sube una nueva imagen para reemplazar la actual (opcional)
+                    {isEditMode
+                        ? 'Sube una nueva imagen para reemplazar la actual (opcional)'
+                        : 'Sube una captura de pantalla u otra imagen de la operación'}
                 </p>
             </div>
 
@@ -246,10 +268,10 @@ export const UpdateOperationForm: React.FC<UpdateOperationFormProps> = ({
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Actualizando...
+                            {isEditMode ? 'Actualizando...' : 'Creando...'}
                         </span>
                     ) : (
-                        'Actualizar Operación'
+                        isEditMode ? 'Actualizar Operación' : 'Crear Operación'
                     )}
                 </button>
             </div>

@@ -1,5 +1,6 @@
 @reference '../../../app/globals.css';
 
+/* Estilos existentes */
 .container {
     @apply mx-auto py-6;
 }
@@ -24,14 +25,6 @@
     @apply text-center py-4;
 }
 
-.symbolCell {
-    @apply font-medium;
-}
-
-.pipsCell {
-    @apply font-mono;
-}
-
 .actionsCell {
     @apply text-right;
 }
@@ -48,23 +41,24 @@
     @apply bg-destructive text-[var(--color-destructive-foreground)] p-2 rounded-md hover:bg-destructive/90 transition-colors;
 }
 
+/* Ajustes para el diálogo */
 .dialogWidth {
-    @apply sm:max-w-lg;
+    @apply max-w-2xl max-h-[90vh] overflow-y-auto;
 }
 
 .resultTag {
     @apply px-2 py-1 rounded-full text-sm font-medium inline-block;
 }
 
-.resultWon {
+.resultWon, .resultwon {
     @apply bg-green-500/20 text-green-500;
 }
 
-.resultLost {
+.resultLost, .resultlost {
     @apply bg-red-500/20 text-red-500;
 }
 
-.resultBE {
+.resultBe, .resultbe {
     @apply bg-amber-500/20 text-amber-500;
 }
 
@@ -84,14 +78,12 @@
     background-color: #3182ce;
 }
 
-/* Make actions container accommodate three buttons */
 .actionsContainer {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-/* Image preview dialog and container styles */
 .imagePreviewDialog {
     max-width: 800px;
     width: 90vw;
@@ -111,6 +103,43 @@
     border-radius: 4px;
 }
 
-.operationDetails p {
-    margin: 0;
+/* Nuevos estilos para filtros y estadísticas */
+.filtersAndStats {
+    @apply flex flex-col md:flex-row justify-between gap-4 mb-6 bg-card p-4 rounded-lg;
+}
+
+.filterSection {
+    @apply flex flex-col md:flex-row items-start md:items-center gap-2;
+}
+
+.filterLabel {
+    @apply font-medium text-sm;
+}
+
+.symbolFilter {
+    @apply w-full md:w-auto px-3 py-2 bg-input border rounded-md focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
+.statsPanel {
+    @apply flex flex-wrap gap-4 items-center mt-4 md:mt-0;
+}
+
+.statItem {
+    @apply flex flex-col bg-muted/30 p-2 rounded-md min-w-[100px] text-center;
+}
+
+.statLabel {
+    @apply text-xs text-muted-foreground mb-1;
+}
+
+.statValue {
+    @apply font-medium;
+}
+
+.positiveValue {
+    @apply text-green-500;
+}
+
+.negativeValue {
+    @apply text-red-500;
 }
