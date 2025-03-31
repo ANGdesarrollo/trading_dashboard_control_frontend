@@ -1,19 +1,7 @@
 @reference '../../../app/globals.css';
 
-.formError {
-    @apply bg-destructive/10 border border-destructive text-destructive p-3 rounded-md mb-4;
-}
-
 .formGroup {
     @apply mb-4;
-}
-
-.formLabel {
-    @apply block text-sm font-medium mb-1;
-}
-
-.formInput {
-    @apply w-full px-3 py-2 bg-input border rounded-md focus:outline-none focus:ring-2 focus:ring-primary;
 }
 
 .formInputError {

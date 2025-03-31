@@ -6,6 +6,9 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { SymbolDto } from '@/features/shared/interfaces';
 import { symbolSchema } from "@/features/symbol/schemas/SymbolSchema";
 import styles from './symbol-create-form.module.css';
+import {Input} from "@/features/shared/atoms/Input";
+import {ErrorMessage} from "@/features/shared/atoms/ErrorMessage";
+import {Label} from "@/features/shared/atoms/Label";
 
 interface CreateSymbolFormProps {
     onSubmit: (data: SymbolDto) => Promise<void>;
@@ -32,16 +35,14 @@ export const CreateSymbolForm: React.FC<CreateSymbolFormProps> = ({
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             {errorMessage && (
-                <div className={styles.formError}>
-                    {errorMessage}
-                </div>
+                <ErrorMessage text={errorMessage}/>
             )}
 
             <div className={styles.formGroup}>
-                <label htmlFor="name" className={styles.formLabel}>
-                    Nombre del Símbolo
-                </label>
-                <input
+                <Label htmlFor="name">
+                    Nombre del Símbol
+                </Label>
+                <Input
                     id="name"
                     {...register('name')}
                     className={`${styles.formInput} ${
@@ -50,9 +51,7 @@ export const CreateSymbolForm: React.FC<CreateSymbolFormProps> = ({
                     placeholder="Ej: EURUSD, BTCUSD, AAPL"
                 />
                 {errors.name && (
-                    <p className={styles.errorMessage}>
-                        {errors.name.message}
-                    </p>
+                    <ErrorMessage text={errors.name.message ?? 'Error'}/>
                 )}
                 <p className={styles.helperText}>
                     Solo letras, números y / son permitidos (ej: EUR/USD)
