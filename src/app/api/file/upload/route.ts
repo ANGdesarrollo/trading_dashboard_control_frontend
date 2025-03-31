@@ -6,7 +6,6 @@ const fileService = new HttpService({
     baseURL: API_BASE_URL,
     defaultNextCache: {
         tags: ['file'],
-        revalidate: 60
     }
 });
 

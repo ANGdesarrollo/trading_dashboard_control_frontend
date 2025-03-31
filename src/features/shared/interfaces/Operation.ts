@@ -1,5 +1,6 @@
 import {BaseDomain} from "@/features/shared/interfaces/BaseDomain";
 import { Symbol } from "@/features/shared/interfaces/Symbol";
+import { File } from "@/features/shared/interfaces/File";
 
 export enum TradeType {
     LONG = 'LONG',

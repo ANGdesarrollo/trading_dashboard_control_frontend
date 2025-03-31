@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { HttpService } from "@/lib/http_helper/HttpHelper";
-import { Symbol, SymbolDto, UpdateSymbolDto } from "@/features/shared/interfaces";
-import { revalidatePath } from 'next/cache';
+import {Operation, OperationDto, UpdateOperationDto} from "@/features/shared/interfaces";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const operationService = new HttpService({
     baseURL: API_BASE_URL,
     defaultNextCache: {
         tags: ['operation'],
-        revalidate: 60
     }
 });
 
@@ -18,8 +16,7 @@ export async function GET(request: NextRequest) {
 
     try {
         if (id) {
-            // Get symbol by ID
-            const result = await operationService.get<Symbol>(`/symbol/${id}`);
+            const result = await operationService.get<Operation>(`/operation/${id}`);
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -30,8 +27,7 @@ export async function GET(request: NextRequest) {
                 );
             }
         } else {
-            // List all symbols
-            const result = await operationService.get<Symbol[]>('/symbol');
+            const result = await operationService.get<Operation[]>('/operation');
 
             if (result.success) {
                 return NextResponse.json(result.data);
@@ -50,12 +46,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json() as SymbolDto;
-        const result = await operationService.post<Symbol>('/symbol', body);
+        console.log('entre');
+        const body = await request.json() as OperationDto;
+        const result = await operationService.post<Operation>('/operation', body);
 
         if (result.success) {
-            // Revalidate the symbol page after successful creation
-            revalidatePath('/symbol');
             return NextResponse.json(result.data);
         } else {
             return NextResponse.json(
@@ -64,7 +59,7 @@ export async function POST(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error creating symbol:', error);
+        console.error('Error creating operation:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
@@ -74,16 +69,14 @@ export async function PUT(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ message: 'Symbol ID is required' }, { status: 400 });
+        return NextResponse.json({ message: 'Operation ID is required' }, { status: 400 });
     }
 
     try {
-        const body = await request.json() as UpdateSymbolDto;
-        const result = await operationService.put<Symbol>(`/symbol/${id}`, body);
+        const body = await request.json() as UpdateOperationDto;
+        const result = await operationService.put<Operation>(`/operation/${id}`, body);
 
         if (result.success) {
-            // Revalidate the symbol page after successful update
-            revalidatePath('/symbol');
             return NextResponse.json(result.data);
         } else {
             return NextResponse.json(
@@ -92,7 +85,7 @@ export async function PUT(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error updating symbol:', error);
+        console.error('Error updating operation:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
@@ -102,16 +95,14 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ message: 'Symbol ID is required' }, { status: 400 });
+        return NextResponse.json({ message: 'Operation ID is required' }, { status: 400 });
     }
 
     try {
-        const result = await operationService.delete<void>(`/symbol/${id}`);
+        const result = await operationService.delete<void>(`/operation/${id}`);
 
         if (result.success) {
-            // Revalidate the symbol page after successful deletion
-            revalidatePath('/symbol');
-            return NextResponse.json({ message: 'Symbol deleted successfully' });
+            return NextResponse.json({ message: 'Operation deleted successfully' });
         } else {
             return NextResponse.json(
                 { message: result.error.message },
@@ -119,7 +110,7 @@ export async function DELETE(request: NextRequest) {
             );
         }
     } catch (error) {
-        console.error('Error deleting symbol:', error);
+        console.error('Error deleting operation:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

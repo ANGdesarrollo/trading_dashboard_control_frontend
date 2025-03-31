@@ -1,0 +1,45 @@
+@reference '../../../app/globals.css';
+
+.dialogWidth {
+    @apply sm:max-w-md;
+}
+
+.content {
+    @apply my-4;
+}
+
+.formError {
+    @apply bg-destructive/10 border border-destructive text-destructive p-3 rounded-md mb-4;
+}
+
+.warningText {
+    @apply text-base font-medium mb-2;
+}
+
+.operationDetails {
+    @apply bg-muted/30 p-3 rounded-md my-3 space-y-1 text-sm;
+}
+
+.warningDescription {
+    @apply text-sm text-muted-foreground mt-4;
+}
+
+.footer {
+    @apply flex justify-end gap-2 mt-6;
+}
+
+.cancelButton {
+    @apply px-4 py-2 bg-secondary text-[var(--color-secondary-foreground)] rounded-md hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-colors;
+}
+
+.deleteButton {
+    @apply px-4 py-2 bg-destructive text-[var(--color-destructive-foreground)] rounded-md hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 transition-colors;
+}
+
+.loadingIcon {
+    @apply animate-spin h-4 w-4 text-[var(--color-destructive-foreground)];
+}
+
+.loadingSpinner {
+    @apply flex items-center gap-2;
+}

@@ -68,13 +68,20 @@ export class HttpService {
             }
             : {};
 
+
+        const headersToSend = {
+            ...this.headers,
+            ...headers
+        };
+
+        if (body instanceof FormData) {
+            delete headersToSend['Content-Type'];
+        }
+
         try {
             const response = await fetch(`${this.baseURL}${url}${queryString}`, {
                 method,
-                headers: {
-                    ...this.headers,
-                    ...headers // 🔥 Sobrescribí o agregá headers custom
-                },
+                headers: headersToSend,
                 body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
                 ...next
             });
