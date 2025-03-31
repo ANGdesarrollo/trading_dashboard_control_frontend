@@ -1,0 +1,21 @@
+@reference '../../../app/globals.css';
+
+.container {
+    @apply max-w-2xl mx-auto py-6 px-4;
+}
+
+.header {
+    @apply flex justify-between items-center mb-6;
+}
+
+.title {
+    @apply text-2xl font-bold;
+}
+
+.backButton {
+    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors;
+}
+
+.formContainer {
+    @apply bg-card p-6 rounded-lg shadow-sm;
+}

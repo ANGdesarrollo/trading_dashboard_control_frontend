@@ -8,17 +8,15 @@ import {
     TableHeader,
     TableRow
 } from "@/features/shared/organisms/Table";
-import {Symbol, SymbolDto, UpdateSymbolDto} from "@/features/shared/interfaces";
+import {Symbol} from "@/features/shared/interfaces";
 import {formatDate} from "@/lib/utils";
 import React, {useState} from "react";
-import {CreateSymbolForm} from "@/features/symbol/molecules/SymbolCreateForm";
-import {symbolRepository} from "@/features/shared/repositories";
 import { Dialog } from "@radix-ui/react-dialog";
-import {DialogContent, DialogHeader, DialogTitle} from "@/features/shared/molecules/Dialog";
-import {UpdateSymbolForm} from "@/features/symbol/molecules/SymbolUpdateForm";
 import {SymbolDeleteConfirmation} from "@/features/symbol/molecules/SymbolDeleteConfirmation";
 import styles from './symbol-table.module.css';
 import {tag} from "@/features/shared/actions/revalidate";
+import {symbolRepository} from "@/features/shared/repositories";
+import {useRouter} from "next/navigation";
 
 interface Props {
     symbols: Symbol[];
@@ -26,54 +24,10 @@ interface Props {
 
 export const SymbolTable = ({symbols}: Props) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [isUpdateOpen, setIsUpdateOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-    const handleCreateSymbol = async (data: SymbolDto) => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const result = await symbolRepository.create(data);
-
-            if (result.success) {
-                await tag('symbol')
-                setIsCreateOpen(false);
-            } else {
-                setError(result.error.message);
-            }
-        } catch (err) {
-            setError('Error al crear el símbolo. Intente nuevamente.');
-            console.error('Error creating symbol:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdateSymbol = async (id: string, data: UpdateSymbolDto) => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const result = await symbolRepository.update(id, data);
-
-            if (result.success) {
-                await tag('symbol')
-                setIsUpdateOpen(false);
-                setSelectedSymbol(null);
-            } else {
-                setError(result.error.message);
-            }
-        } catch (err) {
-            setError('Error al actualizar el símbolo. Intente nuevamente.');
-            console.error('Error updating symbol:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const router = useRouter();
 
     const handleDeleteSymbol = async (id: string) => {
         setIsLoading(true);
@@ -97,11 +51,6 @@ export const SymbolTable = ({symbols}: Props) => {
         }
     };
 
-    const openUpdateDialog = (symbol: Symbol) => {
-        setSelectedSymbol(symbol);
-        setIsUpdateOpen(true);
-    };
-
     const openDeleteDialog = (symbol: Symbol) => {
         setSelectedSymbol(symbol);
         setIsDeleteOpen(true);
@@ -113,42 +62,11 @@ export const SymbolTable = ({symbols}: Props) => {
                 <h1 className={styles.title}>Símbolos</h1>
                 <button
                     className={styles.createButton}
-                    onClick={() => setIsCreateOpen(true)}
+                    onClick={() => router.push('/symbol/create')}
                 >
                     Crear Símbolo
                 </button>
             </div>
-
-            {/* Create Symbol Dialog */}
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className={styles.dialogWidth}>
-                    <DialogHeader>
-                        <DialogTitle>Crear Nuevo Símbolo</DialogTitle>
-                    </DialogHeader>
-                    <CreateSymbolForm
-                        onSubmit={handleCreateSymbol}
-                        isLoading={isLoading}
-                        errorMessage={error}
-                    />
-                </DialogContent>
-            </Dialog>
-
-            {/* Update Symbol Dialog */}
-            <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-                {selectedSymbol && (
-                    <DialogContent className={styles.dialogWidth}>
-                        <DialogHeader>
-                            <DialogTitle>Actualizar Símbolo</DialogTitle>
-                        </DialogHeader>
-                        <UpdateSymbolForm
-                            symbol={selectedSymbol}
-                            onSubmit={handleUpdateSymbol}
-                            isLoading={isLoading}
-                            errorMessage={error}
-                        />
-                    </DialogContent>
-                )}
-            </Dialog>
 
             {/* Delete Symbol Dialog */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -193,7 +111,7 @@ export const SymbolTable = ({symbols}: Props) => {
                                             <button
                                                 className={styles.editButton}
                                                 aria-label="Editar"
-                                                onClick={() => openUpdateDialog(symbol)}
+                                                onClick={() => router.push(`/symbol/update?id=${symbol.id}`)}
                                             >
                                                 Editar
                                             </button>
