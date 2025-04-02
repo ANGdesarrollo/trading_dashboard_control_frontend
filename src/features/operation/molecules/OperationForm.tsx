@@ -6,6 +6,7 @@ import { joiResolver } from '@hookform/resolvers/joi';
 import { Operation, OperationDto, TradeType, Result, Symbol } from '@/features/shared/interfaces';
 import { operationSchema } from "@/features/operation/schemas/OperationSchema";
 import styles from './operation-form.module.css';
+import Image from "next/image";
 
 interface OperationFormProps {
     operation?: Operation; // Optional - if provided, it's an update operation
@@ -212,7 +213,7 @@ export const OperationForm: React.FC<OperationFormProps> = ({
                 />
                 {previewUrl && (
                     <div className={styles.previewContainer}>
-                        <img
+                        <Image
                             src={previewUrl}
                             alt="Vista previa"
                             className={styles.previewImage}

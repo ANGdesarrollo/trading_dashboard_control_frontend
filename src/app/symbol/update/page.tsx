@@ -1,14 +1,15 @@
 import { PublicLayout } from "@/layouts/PublicLayout";
-import {SymbolUpdateTemplate} from "@/features/symbol/template/SymbolUpdateTemplate";
-import {Suspense} from "react";
+import { SymbolUpdateTemplate } from "@/features/symbol/template/SymbolUpdateTemplate";
+import { Suspense } from "react";
 
-interface Props {
-    params: {
-        id: string;
-    };
+interface PageProps {
+    params: Promise<{ id: string }>;
 }
-const Page = ({ params }: Props) => {
-    const { id } = params;
+
+const Page = async ({ params }: PageProps) => {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
     return (
         <PublicLayout>
             <Suspense>
