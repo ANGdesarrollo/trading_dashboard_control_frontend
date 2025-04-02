@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
                 hostname: "localhost",
             },
             {
-                protocol: "http",
+                protocol: "https",
                 hostname: "api.byte2bye.net",
             },
         ],
