@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
                 protocol: "http",
                 hostname: "localhost",
             },
+            {
+                protocol: "http",
+                hostname: "api.byte2bye.net",
+            },
         ],
     },
 };
