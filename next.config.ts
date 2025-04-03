@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
                 protocol: "https",
                 hostname: "api.byte2byte.net", 
             },
+            {
+                protocol: "http",
+                hostname: "api.byte2byte.net",
+            },
         ],
     },
 };
