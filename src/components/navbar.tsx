@@ -36,7 +36,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-4 flex items-center gap-2 lg:mr-6">
+          <Link href="/" className="mr-4 flex items-center gap-2 lg:mr-6" legacyBehavior>
             <TrendingUp className="h-6 w-6" />
             <span className="hidden font-bold lg:inline-block">
               Trading Dashboard
@@ -69,14 +69,13 @@ export function Navbar() {
         {/* Mobile Navigation */}
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Link href="/" className="flex items-center gap-2 md:hidden">
+            <Link href="/" className="flex items-center gap-2 md:hidden" legacyBehavior>
               <TrendingUp className="h-6 w-6" />
               <span className="font-bold">Trading Dashboard</span>
             </Link>
           </div>
         </div>
       </div>
-      
       {/* Mobile Menu */}
       <div className="border-t border-border/40 md:hidden">
         <nav className="flex items-center space-x-4 px-4 py-2">
@@ -90,14 +89,14 @@ export function Navbar() {
                   "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                   isActive && "bg-accent text-accent-foreground"
                 )}
-              >
+                legacyBehavior>
                 <item.icon className="h-4 w-4" />
                 {item.name}
               </Link>
-            )
+            );
           })}
         </nav>
       </div>
     </header>
-  )
+  );
 }
